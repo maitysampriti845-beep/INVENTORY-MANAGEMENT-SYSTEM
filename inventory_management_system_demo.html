@@ -1,0 +1,513 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--bg2:#141720;--bg3:#1c2030;--bg4:#232840;
+  --border:#2a3050;--border2:#3a4560;
+  --text:#e2e8f8;--text2:#8890aa;--text3:#555e7a;
+  --accent:#4f8ef7;--accent2:#7c3aed;--accent3:#10b981;--warn:#f59e0b;--danger:#ef4444;
+  --mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:0}
+.app{max-width:900px;margin:0 auto;padding:1.5rem 1rem}
+.header{text-align:center;margin-bottom:2rem}
+.header h1{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#4f8ef7,#7c3aed,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header p{font-size:.8rem;color:var(--text2);margin-top:.3rem;font-family:var(--mono)}
+.tabs{display:flex;gap:.4rem;margin-bottom:1.5rem;background:var(--bg2);padding:.4rem;border-radius:10px;border:.5px solid var(--border)}
+.tab{flex:1;padding:.5rem;border:none;background:transparent;color:var(--text2);border-radius:7px;cursor:pointer;font-family:var(--sans);font-size:.75rem;font-weight:600;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tab.active{background:var(--bg4);color:var(--text);border:.5px solid var(--border2)}
+.tab-badge{font-size:.6rem;font-family:var(--mono);padding:1px 5px;border-radius:4px;background:var(--bg3)}
+.tab:nth-child(1).active .tab-badge{background:#1e3a5f;color:var(--accent)}
+.tab:nth-child(2).active .tab-badge{background:#2d1b69;color:#a78bfa}
+.tab:nth-child(3).active .tab-badge{background:#064e3b;color:var(--accent3)}
+.panel{display:none}
+.panel.active{display:block}
+.card{background:var(--bg2);border:.5px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem}
+.card-title{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem}
+.db-tag{font-size:.55rem;font-family:var(--mono);padding:2px 6px;border-radius:4px;font-weight:400;letter-spacing:0}
+.db-redis{background:#1a0808;color:#ff6b6b;border:.5px solid #4a1010}
+.db-mongo{background:#0a1a0a;color:#4ade80;border:.5px solid #0f3a0f}
+.db-neo4j{background:#0a0f2a;color:#60a5fa;border:.5px solid #1e3a6a}
+.row{display:flex;gap:.6rem;align-items:flex-start;flex-wrap:wrap}
+.col{flex:1;min-width:200px}
+input,select,textarea{background:var(--bg3);border:.5px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:.75rem;padding:.4rem .6rem;width:100%;outline:none;transition:border .2s}
+input:focus,select:focus{border-color:var(--accent)}
+.label{font-size:.65rem;color:var(--text2);margin-bottom:.25rem;display:block;font-family:var(--mono)}
+.btn{padding:.4rem .8rem;border:.5px solid var(--border2);background:var(--bg3);color:var(--text);border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:.72rem;font-weight:600;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--bg4);border-color:var(--accent)}
+.btn-primary{background:#1a2d5a;border-color:var(--accent);color:var(--accent)}
+.btn-primary:hover{background:#213670}
+.btn-danger{background:#2d0a0a;border-color:var(--danger);color:var(--danger)}
+.btn-success{background:#0a2d1a;border-color:var(--accent3);color:var(--accent3)}
+.terminal{background:#080c14;border:.5px solid var(--border);border-radius:8px;padding:.75rem;font-family:var(--mono);font-size:.7rem;min-height:80px;max-height:220px;overflow-y:auto;line-height:1.6}
+.t-prompt{color:var(--text3)}
+.t-ok{color:var(--accent3)}
+.t-err{color:var(--danger)}
+.t-warn{color:var(--warn)}
+.t-info{color:var(--accent)}
+.t-data{color:#c4b5fd}
+.rate-meter{display:flex;gap:.3rem;margin:.5rem 0;align-items:center}
+.rate-dot{width:24px;height:24px;border-radius:5px;border:.5px solid var(--border);transition:all .3s;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:var(--text3)}
+.rate-dot.used{background:#1a2d5a;border-color:var(--accent);color:var(--accent)}
+.rate-dot.blocked{background:#2d0a0a;border-color:var(--danger);color:var(--danger)}
+.stat-row{display:flex;gap:.6rem;margin-bottom:.75rem}
+.stat{background:var(--bg3);border:.5px solid var(--border);border-radius:7px;padding:.5rem .7rem;flex:1;text-align:center}
+.stat-val{font-size:1.1rem;font-weight:700;font-family:var(--mono)}
+.stat-lbl{font-size:.6rem;color:var(--text2);margin-top:2px}
+.inv-list{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem;max-height:200px;overflow-y:auto}
+.inv-item{background:var(--bg3);border:.5px solid var(--border);border-radius:7px;padding:.5rem .7rem;display:flex;align-items:center;gap:.6rem;font-size:.72rem}
+.inv-item:hover{border-color:var(--border2)}
+.inv-id{font-family:var(--mono);color:var(--text3);font-size:.6rem;min-width:60px}
+.inv-name{font-weight:600;flex:1}
+.inv-qty{font-family:var(--mono);font-size:.75rem;color:var(--accent);min-width:40px;text-align:right}
+.inv-cat{font-size:.6rem;padding:1px 5px;border-radius:4px;background:var(--bg4);color:var(--text2)}
+.stack-visual{display:flex;flex-direction:column;gap:2px;margin:.5rem 0}
+.stack-item{background:var(--bg4);border:.5px solid var(--border);border-radius:4px;padding:.25rem .5rem;font-family:var(--mono);font-size:.65rem;color:var(--text2);display:flex;justify-content:space-between;transition:all .3s}
+.stack-item.top{background:#1a2d0a;border-color:#4ade80;color:#4ade80}
+.graph-area{background:#080c14;border:.5px solid var(--border);border-radius:8px;padding:.75rem;position:relative;overflow:hidden}
+.graph-svg{width:100%;display:block}
+.cypher-box{background:#080c14;border:.5px solid var(--border);border-radius:6px;padding:.5rem;font-family:var(--mono);font-size:.65rem;color:#c4b5fd;white-space:pre-wrap;margin-top:.5rem;line-height:1.5}
+.badge{display:inline-block;font-size:.55rem;font-family:var(--mono);padding:1px 5px;border-radius:3px}
+.badge-ok{background:#0a2d1a;color:#4ade80}
+.badge-blocked{background:#2d0a0a;color:#ef4444}
+.tt-clock{font-family:var(--mono);font-size:.7rem;color:var(--warn)}
+.divider{height:.5px;background:var(--border);margin:.75rem 0}
+.result-box{background:var(--bg3);border:.5px solid var(--border);border-radius:6px;padding:.5rem;font-family:var(--mono);font-size:.67rem;margin-top:.5rem;min-height:36px;color:var(--text2);white-space:pre-wrap;word-break:break-all}
+select option{background:var(--bg3)}
+</style>
+
+<div class="app">
+<div class="header">
+  <h1>Inventory Management System</h1>
+  <p>Three subsystems · Three unstructured databases · One platform</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(0)">
+    Rate Limiter
+    <span class="tab-badge db-redis">Redis · Port 2100</span>
+  </button>
+  <button class="tab" onclick="switchTab(1)">
+    Inventory Stack
+    <span class="tab-badge db-mongo" style="background:#1a2d0a;color:#4ade80;border-color:#2a4a1a">MongoDB · REST API</span>
+  </button>
+  <button class="tab" onclick="switchTab(2)">
+    Product Graph
+    <span class="tab-badge db-neo4j">Neo4j · Cypher</span>
+  </button>
+</div>
+
+<!-- PANEL 1: RATE LIMITER -->
+<div class="panel active" id="panel-0">
+  <div class="stat-row">
+    <div class="stat"><div class="stat-val" id="rl-allowed" style="color:var(--accent3)">0</div><div class="stat-lbl">Requests Allowed</div></div>
+    <div class="stat"><div class="stat-val" id="rl-blocked" style="color:var(--danger)">0</div><div class="stat-lbl">Requests Blocked</div></div>
+    <div class="stat"><div class="stat-val tt-clock" id="rl-ttl">60s</div><div class="stat-lbl">Window Reset</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--text2)">5</div><div class="stat-lbl">Rate Limit</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Token Bucket Visualizer <span class="db-tag db-redis">Redis INCR + TTL</span></div>
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;flex-wrap:wrap">
+      <div>
+        <span class="label">Client IP / User</span>
+        <select id="rl-user" style="width:130px">
+          <option>192.168.1.1</option>
+          <option>192.168.1.2</option>
+          <option>10.0.0.5</option>
+        </select>
+      </div>
+      <div>
+        <span class="label">Endpoint</span>
+        <select id="rl-endpoint" style="width:140px">
+          <option>/api/inventory</option>
+          <option>/api/product</option>
+          <option>/api/graph</option>
+        </select>
+      </div>
+      <div style="align-self:flex-end;display:flex;gap:.4rem">
+        <button class="btn btn-primary" onclick="sendRequest()">Send Request</button>
+        <button class="btn" onclick="resetRL()">Reset Window</button>
+      </div>
+    </div>
+
+    <div class="rate-meter" id="rate-meter">
+      <span class="label" style="margin-bottom:0;min-width:55px">Slots used:</span>
+    </div>
+
+    <div class="divider"></div>
+    <div class="label">Redis command log <span style="float:right;color:var(--text3);font-weight:400">port :2100</span></div>
+    <div class="terminal" id="rl-terminal">
+      <span class="t-prompt">redis-cli -p 2100</span><br>
+      <span class="t-ok">Connected. Rate limit: 5 req / 60s window.</span><br>
+      <span class="t-prompt">Waiting for requests...</span>
+    </div>
+  </div>
+
+  <div class="card" style="font-size:.72rem;color:var(--text2)">
+    <div class="card-title">Why Redis for Rate Limiting?</div>
+    <div style="line-height:1.7">Redis stores each user's request count as a <span style="color:var(--text);font-family:var(--mono)">key:value</span> pair with an atomic <span style="color:var(--text);font-family:var(--mono)">INCR</span> and a sliding TTL. Operations are O(1) and sub-millisecond — a relational DB would need transactions and row-locks, adding latency every request. The in-memory store handles thousands of concurrent counters without I/O overhead. Each key auto-expires after the window (60s), so no cleanup jobs needed.
+    </div>
+  </div>
+</div>
+
+<!-- PANEL 2: INVENTORY STACK -->
+<div class="panel" id="panel-1">
+  <div class="card">
+    <div class="card-title">Inventory Operations <span class="db-tag db-mongo" style="background:#0a1a0a;color:#4ade80;border-color:#0f3a0f">MongoDB · Document Store</span></div>
+    <div class="row" style="margin-bottom:.75rem">
+      <div class="col" style="min-width:160px">
+        <span class="label">Product Name</span>
+        <input type="text" id="inv-name" placeholder="Laptop Pro X" value="Laptop Pro X">
+      </div>
+      <div class="col" style="min-width:100px">
+        <span class="label">Quantity</span>
+        <input type="number" id="inv-qty" placeholder="50" value="50" min="0">
+      </div>
+      <div class="col" style="min-width:110px">
+        <span class="label">Category</span>
+        <select id="inv-cat">
+          <option>Electronics</option>
+          <option>Furniture</option>
+          <option>Apparel</option>
+          <option>Tools</option>
+        </select>
+      </div>
+      <div class="col" style="min-width:90px">
+        <span class="label">Price (₹)</span>
+        <input type="number" id="inv-price" placeholder="45000" value="45000">
+      </div>
+    </div>
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem">
+      <button class="btn btn-primary" onclick="addItem()">+ Add / Push</button>
+      <button class="btn btn-success" onclick="viewAll()">View All</button>
+      <button class="btn" onclick="viewById()">View by ID</button>
+      <button class="btn" onclick="updateItem()">Update</button>
+      <button class="btn btn-danger" onclick="deleteItem()">Delete (Pop)</button>
+    </div>
+    <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:.5rem">
+      <span class="label" style="margin-bottom:0">Target ID:</span>
+      <input type="text" id="inv-target-id" placeholder="e.g. INV-001" style="width:120px">
+    </div>
+    <div class="label">MongoDB operation log</div>
+    <div class="terminal" id="inv-terminal" style="min-height:60px;max-height:140px">
+      <span class="t-ok">db.inventory connected.</span><br>
+      <span class="t-prompt">Ready for CRUD operations...</span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <div class="card-title">Stack (LIFO) View</div>
+        <div style="font-size:.6rem;color:var(--text3);margin-bottom:.4rem;font-family:var(--mono)">← TOP (most recently added)</div>
+        <div class="stack-visual" id="stack-visual">
+          <div class="t-prompt" style="font-family:var(--mono);font-size:.65rem">Stack empty. Add items.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="card-title">Live Inventory</div>
+        <div class="inv-list" id="inv-list">
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--text3)">No items yet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="font-size:.72rem;color:var(--text2)">
+    <div class="card-title">Why MongoDB for Inventory?</div>
+    <div style="line-height:1.7">Inventory items are heterogeneous — a laptop has <span style="color:var(--text);font-family:var(--mono)">RAM/GPU</span> fields; furniture has <span style="color:var(--text);font-family:var(--mono)">dimensions/material</span>. MongoDB's schema-less documents let each product carry exactly the fields it needs without NULL columns. A stack (LIFO) is modelled via push/pop on an array field, ideal for warehouse intake logs. Horizontal sharding handles catalog growth without schema migrations.
+    </div>
+  </div>
+</div>
+
+<!-- PANEL 3: GRAPH DB -->
+<div class="panel" id="panel-2">
+  <div class="card">
+    <div class="card-title">Product–Manufacturer Graph <span class="db-tag db-neo4j">Neo4j · Cypher Query</span></div>
+    <div class="graph-area">
+      <svg class="graph-svg" viewBox="0 0 560 280" id="graph-svg">
+        <defs>
+          <marker id="garrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="#4f8ef7" stroke-width="1.5" stroke-linecap="round"/>
+          </marker>
+          <marker id="garrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/>
+          </marker>
+          <marker id="garrow3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+          </marker>
+        </defs>
+        <!-- Manufacturer nodes -->
+        <circle cx="100" cy="60" r="34" fill="#13203a" stroke="#4f8ef7" stroke-width="1.2"/>
+        <text x="100" y="55" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#93c5fd">MANUFACTURER</text>
+        <text x="100" y="68" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#e2e8f8">TechCorp</text>
+
+        <circle cx="100" cy="165" r="34" fill="#13203a" stroke="#4f8ef7" stroke-width="1.2"/>
+        <text x="100" y="160" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#93c5fd">MANUFACTURER</text>
+        <text x="100" y="173" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#e2e8f8">FurnCo</text>
+
+        <circle cx="100" cy="240" r="34" fill="#13203a" stroke="#4f8ef7" stroke-width="1.2"/>
+        <text x="100" y="235" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#93c5fd">MANUFACTURER</text>
+        <text x="100" y="248" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#e2e8f8">Appex</text>
+
+        <!-- Product nodes -->
+        <rect x="220" y="20" width="90" height="42" rx="8" fill="#0a2d1a" stroke="#10b981" stroke-width="1"/>
+        <text x="265" y="36" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#6ee7b7">PRODUCT</text>
+        <text x="265" y="50" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#e2e8f8">Laptop X</text>
+
+        <rect x="220" y="90" width="90" height="42" rx="8" fill="#0a2d1a" stroke="#10b981" stroke-width="1"/>
+        <text x="265" y="106" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#6ee7b7">PRODUCT</text>
+        <text x="265" y="120" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#e2e8f8">Phone Y</text>
+
+        <rect x="220" y="148" width="90" height="42" rx="8" fill="#0a2d1a" stroke="#10b981" stroke-width="1"/>
+        <text x="265" y="164" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#6ee7b7">PRODUCT</text>
+        <text x="265" y="178" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#e2e8f8">Desk Z</text>
+
+        <rect x="220" y="213" width="90" height="42" rx="8" fill="#0a2d1a" stroke="#10b981" stroke-width="1"/>
+        <text x="265" y="229" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#6ee7b7">PRODUCT</text>
+        <text x="265" y="243" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#e2e8f8">Jacket W</text>
+
+        <!-- Supplier/Category nodes -->
+        <rect x="390" y="40" width="90" height="36" rx="8" fill="#1a0d3a" stroke="#a78bfa" stroke-width="1"/>
+        <text x="435" y="55" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#c4b5fd">SUPPLIER</text>
+        <text x="435" y="68" text-anchor="middle" font-family="'Syne',sans-serif" font-size="9" font-weight="700" fill="#e2e8f8">GlobalParts</text>
+
+        <rect x="390" y="120" width="90" height="36" rx="8" fill="#1a0d3a" stroke="#a78bfa" stroke-width="1"/>
+        <text x="435" y="135" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#c4b5fd">SUPPLIER</text>
+        <text x="435" y="148" text-anchor="middle" font-family="'Syne',sans-serif" font-size="9" font-weight="700" fill="#e2e8f8">EastTextiles</text>
+
+        <rect x="390" y="205" width="90" height="36" rx="8" fill="#1a0d3a" stroke="#a78bfa" stroke-width="1"/>
+        <text x="435" y="220" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#c4b5fd">CATEGORY</text>
+        <text x="435" y="233" text-anchor="middle" font-family="'Syne',sans-serif" font-size="9" font-weight="700" fill="#e2e8f8">Electronics</text>
+
+        <!-- Edges: MANUFACTURES -->
+        <line x1="134" y1="60" x2="218" y2="41" stroke="#4f8ef7" stroke-width="1.2" marker-end="url(#garrow)"/>
+        <line x1="134" y1="70" x2="218" y2="111" stroke="#4f8ef7" stroke-width="1.2" marker-end="url(#garrow)"/>
+        <line x1="134" y1="165" x2="218" y2="169" stroke="#4f8ef7" stroke-width="1.2" marker-end="url(#garrow)"/>
+        <line x1="134" y1="240" x2="218" y2="234" stroke="#4f8ef7" stroke-width="1.2" marker-end="url(#garrow)"/>
+
+        <!-- Edges: SOURCED_FROM -->
+        <line x1="310" y1="41" x2="388" y2="55" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#garrow3)"/>
+        <line x1="310" y1="111" x2="388" y2="138" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#garrow3)"/>
+        <line x1="310" y1="234" x2="388" y2="220" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#garrow3)"/>
+        <line x1="310" y1="41" x2="388" y2="218" stroke="#10b981" stroke-width=".8" stroke-dasharray="3 4" marker-end="url(#garrow2)" opacity=".6"/>
+
+        <!-- Edge labels -->
+        <text x="170" y="45" font-family="'JetBrains Mono',monospace" font-size="7" fill="#4f8ef7">MAKES</text>
+        <text x="168" y="97" font-family="'JetBrains Mono',monospace" font-size="7" fill="#4f8ef7">MAKES</text>
+        <text x="166" y="162" font-family="'JetBrains Mono',monospace" font-size="7" fill="#4f8ef7">MAKES</text>
+        <text x="166" y="236" font-family="'JetBrains Mono',monospace" font-size="7" fill="#4f8ef7">MAKES</text>
+        <text x="335" y="44" font-family="'JetBrains Mono',monospace" font-size="7" fill="#a78bfa">FROM</text>
+        <text x="334" y="119" font-family="'JetBrains Mono',monospace" font-size="7" fill="#a78bfa">FROM</text>
+
+        <!-- Legend -->
+        <circle cx="18" cy="260" r="5" fill="#13203a" stroke="#4f8ef7" stroke-width="1"/>
+        <text x="28" y="264" font-family="'Syne',sans-serif" font-size="8" fill="#8890aa">Manufacturer</text>
+        <rect x="100" y="256" width="10" height="8" rx="2" fill="#0a2d1a" stroke="#10b981" stroke-width=".8"/>
+        <text x="114" y="264" font-family="'Syne',sans-serif" font-size="8" fill="#8890aa">Product</text>
+        <rect x="168" y="256" width="10" height="8" rx="2" fill="#1a0d3a" stroke="#a78bfa" stroke-width=".8"/>
+        <text x="182" y="264" font-family="'Syne',sans-serif" font-size="8" fill="#8890aa">Supplier/Category</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cypher Query Builder</div>
+    <div class="row" style="margin-bottom:.6rem">
+      <div class="col">
+        <span class="label">Query Type</span>
+        <select id="cypher-type" onchange="buildCypher()">
+          <option value="find_products">Find products by manufacturer</option>
+          <option value="find_mfr">Find manufacturer of product</option>
+          <option value="supplier_chain">Trace supplier chain</option>
+          <option value="category">Find by category</option>
+          <option value="add_rel">Add relationship</option>
+        </select>
+      </div>
+      <div class="col">
+        <span class="label">Parameter</span>
+        <input type="text" id="cypher-param" value="TechCorp" oninput="buildCypher()">
+      </div>
+      <div style="align-self:flex-end"><button class="btn btn-primary" onclick="runCypher()">Run ▶</button></div>
+    </div>
+    <div class="label">Generated Cypher</div>
+    <div class="cypher-box" id="cypher-display">MATCH (m:Manufacturer {name: "TechCorp"})-[:MAKES]->(p:Product)
+RETURN m.name AS manufacturer, p.name AS product, p.price AS price</div>
+    <div class="label" style="margin-top:.5rem">Query Result</div>
+    <div class="result-box" id="cypher-result">Click "Run ▶" to execute query.</div>
+  </div>
+
+  <div class="card" style="font-size:.72rem;color:var(--text2)">
+    <div class="card-title">Why Neo4j for Product–Manufacturer Correlation?</div>
+    <div style="line-height:1.7">Supplier chains and product relationships are inherently graph-shaped: a product can have multiple manufacturers, suppliers can supply multiple products, and finding indirect relationships (e.g. "which products share a supplier?") requires multi-hop traversal. In SQL this needs costly multi-join queries. Neo4j stores nodes and edges natively — traversal is pointer-chasing O(depth), not O(rows×joins). Cypher queries express "find all manufacturers 2 hops away" in one readable line.
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ---- STATE ----
+const rlState={counts:{},timers:{}};
+const invState={items:[],nextId:1};
+const graphState={};
+
+// ---- HELPERS ----
+function log(termId,html){const t=document.getElementById(termId);t.innerHTML+=html+'\n';t.scrollTop=t.scrollHeight}
+function ts(){return new Date().toLocaleTimeString('en',{hour12:false})}
+function uid(){return 'INV-'+String(invState.nextId++).padStart(3,'0')}
+
+// ---- PANEL SWITCH ----
+function switchTab(idx){
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+}
+
+// ---- RATE LIMITER ----
+const RL_LIMIT=5,RL_WINDOW=60;
+function renderDots(user){
+  const used=(rlState.counts[user]||0);
+  const m=document.getElementById('rate-meter');
+  let h='<span class="label" style="margin-bottom:0;min-width:55px">Slots used:</span>';
+  for(let i=0;i<RL_LIMIT;i++){
+    if(i<used&&used>RL_LIMIT)h+=`<div class="rate-dot blocked">✕</div>`;
+    else if(i<Math.min(used,RL_LIMIT))h+=`<div class="rate-dot used">${i+1}</div>`;
+    else h+=`<div class="rate-dot">${i+1}</div>`;
+  }
+  h+=`<span style="font-family:var(--mono);font-size:.65rem;color:var(--text2);margin-left:4px">${Math.min(used,RL_LIMIT)}/${RL_LIMIT}</span>`;
+  if(used>RL_LIMIT)h+=`<span class="badge badge-blocked" style="margin-left:4px">+${used-RL_LIMIT} blocked</span>`;
+  m.innerHTML=h;
+}
+function sendRequest(){
+  const user=document.getElementById('rl-user').value;
+  const ep=document.getElementById('rl-endpoint').value;
+  if(!rlState.counts[user])rlState.counts[user]=0;
+  if(!rlState.timers[user]){
+    rlState.timers[user]=RL_WINDOW;
+    const iv=setInterval(()=>{
+      rlState.timers[user]--;
+      document.getElementById('rl-ttl').textContent=rlState.timers[user]+'s';
+      if(rlState.timers[user]<=0){clearInterval(iv);delete rlState.timers[user];delete rlState.counts[user];document.getElementById('rl-ttl').textContent='60s';renderDots(user);}
+    },1000);
+  }
+  rlState.counts[user]++;
+  const count=rlState.counts[user];
+  const allowed=count<=RL_LIMIT;
+  const totalAllowed=parseInt(document.getElementById('rl-allowed').textContent)||0;
+  const totalBlocked=parseInt(document.getElementById('rl-blocked').textContent)||0;
+  if(allowed){document.getElementById('rl-allowed').textContent=totalAllowed+1;}
+  else{document.getElementById('rl-blocked').textContent=totalBlocked+1;}
+  renderDots(user);
+  const ttl=rlState.timers[user]||60;
+  log('rl-terminal',`<span class="t-prompt">[${ts()}] ${user} → ${ep}</span>`);
+  log('rl-terminal',`<span class="t-info">  INCR rate:${user}:${ep} → ${count}</span>`);
+  log('rl-terminal',`<span class="t-info">  TTL rate:${user}:${ep} → ${ttl}s</span>`);
+  if(allowed){
+    log('rl-terminal',`<span class="t-ok">  ✓ 200 OK  [${count}/${RL_LIMIT} slots used]</span>`);
+  } else {
+    log('rl-terminal',`<span class="t-err">  ✕ 429 Too Many Requests</span>`);
+    log('rl-terminal',`<span class="t-warn">  Retry-After: ${ttl}s</span>`);
+  }
+}
+function resetRL(){
+  const user=document.getElementById('rl-user').value;
+  delete rlState.counts[user];delete rlState.timers[user];
+  document.getElementById('rl-ttl').textContent='60s';
+  renderDots(user);
+  log('rl-terminal',`<span class="t-warn">[${ts()}] Window reset for ${user}</span>`);
+}
+renderDots('192.168.1.1');
+
+// ---- INVENTORY ----
+function renderInventory(){
+  const list=document.getElementById('inv-list');
+  const stack=document.getElementById('stack-visual');
+  if(!invState.items.length){
+    list.innerHTML='<div style="font-family:var(--mono);font-size:.65rem;color:var(--text3)">No items yet.</div>';
+    stack.innerHTML='<div class="t-prompt" style="font-family:var(--mono);font-size:.65rem">Stack empty.</div>';
+    return;
+  }
+  list.innerHTML=invState.items.map(it=>`
+    <div class="inv-item">
+      <span class="inv-id">${it.id}</span>
+      <span class="inv-name">${it.name}</span>
+      <span class="inv-cat">${it.category}</span>
+      <span class="inv-qty">×${it.qty}</span>
+      <span style="font-family:var(--mono);font-size:.65rem;color:var(--text3)">₹${it.price}</span>
+    </div>`).join('');
+  const stackItems=[...invState.items].reverse();
+  stack.innerHTML=stackItems.map((it,i)=>`
+    <div class="stack-item${i===0?' top':''}">
+      <span>${it.id}: ${it.name}</span>
+      <span style="color:var(--text3)">×${it.qty}</span>
+    </div>`).join('');
+}
+function addItem(){
+  const name=document.getElementById('inv-name').value.trim();
+  const qty=parseInt(document.getElementById('inv-qty').value)||0;
+  const cat=document.getElementById('inv-cat').value;
+  const price=parseInt(document.getElementById('inv-price').value)||0;
+  if(!name){log('inv-terminal','<span class="t-err">Error: name required</span>');return;}
+  const id=uid();
+  invState.items.push({id,name,qty,category:cat,price});
+  log('inv-terminal',`<span class="t-info">db.inventory.insertOne({_id:"${id}", name:"${name}", qty:${qty}, cat:"${cat}"})</span>`);
+  log('inv-terminal',`<span class="t-ok">→ Acknowledged. insertedId: "${id}"</span>`);
+  renderInventory();
+}
+function viewAll(){
+  log('inv-terminal',`<span class="t-info">db.inventory.find({}).toArray()</span>`);
+  if(!invState.items.length){log('inv-terminal','<span class="t-warn">→ [] (empty collection)</span>');return;}
+  invState.items.forEach(it=>log('inv-terminal',`<span class="t-data">  { _id:"${it.id}", name:"${it.name}", qty:${it.qty}, cat:"${it.category}", price:${it.price} }</span>`));
+}
+function viewById(){
+  const id=document.getElementById('inv-target-id').value.trim();
+  const item=invState.items.find(i=>i.id===id);
+  log('inv-terminal',`<span class="t-info">db.inventory.findOne({_id:"${id}"})</span>`);
+  if(item)log('inv-terminal',`<span class="t-data">→ { _id:"${item.id}", name:"${item.name}", qty:${item.qty}, cat:"${item.category}", price:${item.price} }</span>`);
+  else log('inv-terminal',`<span class="t-err">→ null (not found)</span>`);
+}
+function updateItem(){
+  const id=document.getElementById('inv-target-id').value.trim();
+  const qty=parseInt(document.getElementById('inv-qty').value)||0;
+  const idx=invState.items.findIndex(i=>i.id===id);
+  log('inv-terminal',`<span class="t-info">db.inventory.updateOne({_id:"${id}"}, {$set:{qty:${qty}}})</span>`);
+  if(idx>=0){invState.items[idx].qty=qty;log('inv-terminal','<span class="t-ok">→ matchedCount:1, modifiedCount:1</span>');renderInventory();}
+  else log('inv-terminal','<span class="t-err">→ matchedCount:0 (not found)</span>');
+}
+function deleteItem(){
+  const id=document.getElementById('inv-target-id').value.trim();
+  const idx=invState.items.findIndex(i=>i.id===id);
+  log('inv-terminal',`<span class="t-info">db.inventory.deleteOne({_id:"${id}"})</span>`);
+  if(idx>=0){const it=invState.items.splice(idx,1)[0];log('inv-terminal',`<span class="t-ok">→ deletedCount:1 (popped "${it.name}")</span>`);renderInventory();}
+  else log('inv-terminal','<span class="t-err">→ deletedCount:0 (not found)</span>');
+}
+
+// ---- GRAPH ----
+const cypherTemplates={
+  find_products:(p)=>({q:`MATCH (m:Manufacturer {name: "${p}"})-[:MAKES]->(p:Product)\nRETURN m.name AS manufacturer, p.name AS product, p.price AS price`,r:p==='TechCorp'?'manufacturer: TechCorp | product: Laptop X | price: 45000\nmanufacturer: TechCorp | product: Phone Y | price: 28000':p==='FurnCo'?'manufacturer: FurnCo | product: Desk Z | price: 12000':'No records found.'}),
+  find_mfr:(p)=>({q:`MATCH (m:Manufacturer)-[:MAKES]->(p:Product {name: "${p}"})\nRETURN m.name AS manufacturer, p.category AS category`,r:p==='Laptop X'?'manufacturer: TechCorp | category: Electronics':p==='Desk Z'?'manufacturer: FurnCo | category: Furniture':'No records found.'}),
+  supplier_chain:(p)=>({q:`MATCH path = (m:Manufacturer {name:"${p}"})-[:MAKES]->(p:Product)-[:SOURCED_FROM]->(s:Supplier)\nRETURN m.name, p.name, s.name`,r:'TechCorp → Laptop X → GlobalParts\nTechCorp → Phone Y → GlobalParts'}),
+  category:(p)=>({q:`MATCH (p:Product)-[:BELONGS_TO]->(c:Category {name:"${p}"})\nRETURN p.name, p.price\nORDER BY p.price DESC`,r:p==='Electronics'?'Laptop X | ₹45000\nPhone Y | ₹28000':'No products in category.'}),
+  add_rel:(p)=>({q:`MATCH (m:Manufacturer {name:"${p}"}), (s:Supplier {name:"GlobalParts"})\nMERGE (m)-[:PARTNERED_WITH]->(s)\nRETURN m.name, s.name`,r:`Relationship created: (${p})-[:PARTNERED_WITH]->(GlobalParts)`})
+};
+function buildCypher(){
+  const type=document.getElementById('cypher-type').value;
+  const param=document.getElementById('cypher-param').value;
+  const tpl=cypherTemplates[type](param);
+  document.getElementById('cypher-display').textContent=tpl.q;
+  document.getElementById('cypher-result').textContent='Click "Run ▶" to execute.';
+}
+function runCypher(){
+  const type=document.getElementById('cypher-type').value;
+  const param=document.getElementById('cypher-param').value;
+  const tpl=cypherTemplates[type](param);
+  document.getElementById('cypher-result').textContent='Running...\n';
+  setTimeout(()=>{
+    document.getElementById('cypher-result').textContent='✓ Query OK — '+tpl.r(param);
+  },400);
+}
+buildCypher();
+</script>
